@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yahtzee — Casino Night</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: radial-gradient(ellipse at center, #1a4a2e 0%, #0a1f12 100%);
+  min-height: 100vh;
+  font-family: 'Georgia', serif;
+  color: #e8d5a3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 24px 52px;
+}
+
+/* ── Header ── */
+.header-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+h1 {
+  font-size: 2.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #f0c040;
+  text-shadow: 0 0 24px rgba(240,192,64,0.5), 2px 2px 6px rgba(0,0,0,0.9);
+  margin-bottom: 2px;
+  margin-top: 8px;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  letter-spacing: 0.4em;
+  color: #6a9a76;
+  text-transform: uppercase;
+}
+
+/* ── High score badge ── */
+.high-score-badge {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  background: rgba(10, 30, 18, 0.88);
+  border: 1px solid #2d6e40;
+  border-radius: 10px;
+  padding: 6px 14px;
+  text-align: center;
+  min-width: 66px;
+}
+.hs-label {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  color: #6a9a76;
+  text-transform: uppercase;
+}
+.hs-value {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: bold;
+  color: #f0c040;
+  line-height: 1.2;
+}
+@keyframes hsPulse {
+  0%, 100% { box-shadow: none; border-color: #2d6e40; }
+  40%       { box-shadow: 0 0 22px rgba(240,192,64,0.7); border-color: #f0c040; }
+}
+.high-score-badge.new-record { animation: hsPulse 1.5s ease-in-out; }
+
+/* ── Game container (vertical) ── */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  max-width: 860px;
+}
+
+/* ── Scorecard ── */
+.scorecard {
+  width: 100%;
+  background: #0f2a1a;
+  border: 2px solid #2d6e40;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+}
+
+.scorecard-header {
+  background: linear-gradient(180deg, #1e5a32 0%, #143d22 100%);
+  padding: 10px 16px;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #f0c040;
+  border-bottom: 1px solid #2d6e40;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scorecard-cols {
+  display: flex;
+}
+.scorecard-col {
+  flex: 1;
+  min-width: 0;
+}
+.scorecard-col + .scorecard-col {
+  border-left: 1px solid #2d6e40;
+}
+
+.section-header {
+  background: #143d22;
+  padding: 5px 14px;
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #6a9a76;
+  border-bottom: 1px solid #1a4a2a;
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-bottom: 1px solid #1a4a2a;
+  cursor: pointer;
+  transition: background 0.1s;
+  min-height: 34px;
+}
+.score-row:hover:not(.no-hover) { background: #1a4a2a; }
+.score-row.no-hover  { cursor: default; }
+.score-row.scored    { cursor: default; }
+.score-row.meta      { background: #0d2218; cursor: default; }
+.score-row.total-row { border-top: 2px solid #2d6e40; background: #0d2218; cursor: default; }
+
+.score-label {
+  flex: 1;
+  font-size: 0.8rem;
+  color: #c8c0a8;
+}
+.score-value {
+  font-size: 0.88rem;
+  font-weight: bold;
+  min-width: 38px;
+  text-align: right;
+  color: #e8d5a3;
+}
+.score-value.preview      { color: #5a9a6a; font-style: italic; font-weight: normal; }
+.score-value.zero-preview { color: #7a5050; font-style: italic; font-weight: normal; }
+.score-value.locked-val   { color: #f0c040; }
+.score-value.bonus-val    { color: #6ab87a; }
+.score-value.total-val    { color: #f0c040; font-size: 1rem; }
+.score-value.dash         { color: #3a6a4a; }
+
+.bonus-progress {
+  font-size: 0.7rem;
+  color: #6a9a76;
+  margin-left: 6px;
+}
+
+.yahtzee-bonus-row {
+  display: flex;
+  align-items: center;
+  padding: 5px 14px;
+  background: #0d2218;
+  border-bottom: 1px solid #1a4a2a;
+  gap: 8px;
+}
+.bonus-dots { display: flex; gap: 5px; }
+.bonus-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid #2d6e40;
+  background: #0d2218;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.bonus-dot.earned {
+  background: #f0c040;
+  border-color: #f0c040;
+  box-shadow: 0 0 8px rgba(240,192,64,0.7);
+}
+
+.grand-total-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-top: 2px solid #2d6e40;
+  background: #0d2218;
+  cursor: default;
+}
+
+/* ── Bottom panel ── */
+.bottom-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+
+.dice-area {
+  background: #0f3520;
+  border: 2px solid #2d6e40;
+  border-radius: 16px;
+  padding: 28px 28px 22px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.6), 0 4px 14px rgba(0,0,0,0.5);
+}
+
+.dice-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  perspective: 600px;
+}
+
+.die {
+  width: 70px;
+  height: 70px;
+  background: #f5f0e8;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.9);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  user-select: none;
+  border: 3px solid transparent;
+  transform-style: preserve-3d;
+}
+
+.die:hover:not(.rolling):not(.unclickable):not(.locked) {
+  transform: translateY(-4px);
+  box-shadow: 2px 8px 14px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.9);
+}
+
+.die.locked {
+  background: #fffce8;
+  border-color: #f0c040;
+  transform: translateY(-6px);
+  box-shadow: 0 0 12px rgba(240,192,64,0.4), 2px 8px 12px rgba(0,0,0,0.5),
+              inset 0 1px 2px rgba(255,255,255,0.9);
+}
+
+.die.unclickable { cursor: default; }
+
+@keyframes rollSpin {
+  0%   { transform: rotateY(0deg); }
+  100% { transform: rotateY(1440deg); }
+}
+
+.die.rolling {
+  animation: rollSpin 0.65s ease-out;
+  cursor: default;
+  transition: none;
+  backface-visibility: hidden;
+}
+
+.die svg {
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+}
+
+.lock-badge {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f0c040;
+  color: #1a0c00;
+  font-size: 8px;
+  font-weight: bold;
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  display: none;
+  font-family: sans-serif;
+}
+.die.locked .lock-badge { display: block; }
+
+/* ── Controls ── */
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.roll-status {
+  font-size: 0.9rem;
+  color: #8fb89a;
+  letter-spacing: 0.08em;
+  min-height: 1.2em;
+  text-align: center;
+}
+
+.btn {
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  font-weight: bold;
+  width: 210px;
+}
+
+.btn-roll {
+  background: linear-gradient(180deg, #f5c842 0%, #d4a017 100%);
+  color: #1a0c00;
+  box-shadow: 0 4px 0 #8a6500, 0 6px 14px rgba(0,0,0,0.45);
+}
+.btn-roll:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffd84a 0%, #e0b020 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #8a6500, 0 10px 18px rgba(0,0,0,0.45);
+}
+.btn-roll:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #8a6500, 0 3px 8px rgba(0,0,0,0.45);
+}
+.btn-roll:disabled {
+  background: linear-gradient(180deg, #444 0%, #2a2a2a 100%);
+  color: #555;
+  box-shadow: 0 2px 0 #111;
+  cursor: not-allowed;
+}
+
+.btn-new {
+  background: linear-gradient(180deg, #2d8a50 0%, #1d6035 100%);
+  color: #e8d5a3;
+  box-shadow: 0 3px 0 #0d3018, 0 5px 12px rgba(0,0,0,0.45);
+  font-size: 0.85rem;
+}
+.btn-new:hover {
+  background: linear-gradient(180deg, #38a060 0%, #256840 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #0d3018, 0 7px 14px rgba(0,0,0,0.45);
+}
+.btn-new:active { transform: translateY(1px); box-shadow: 0 1px 0 #0d3018; }
+
+.btn-rules {
+  background: linear-gradient(180deg, #1e5a7a 0%, #124060 100%);
+  color: #a8d4e8;
+  box-shadow: 0 3px 0 #0a2030, 0 5px 12px rgba(0,0,0,0.45);
+  font-size: 0.85rem;
+}
+.btn-rules:hover {
+  background: linear-gradient(180deg, #26709a 0%, #185070 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #0a2030, 0 7px 14px rgba(0,0,0,0.45);
+}
+.btn-rules:active { transform: translateY(1px); box-shadow: 0 1px 0 #0a2030; }
+
+/* ── Game-over panel ── */
+.game-over-panel {
+  display: none;
+  background: linear-gradient(160deg, #0d2218 0%, #0a1a10 100%);
+  border: 2px solid #f0c040;
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 0 40px rgba(240,192,64,0.2);
+}
+.game-over-panel.visible { display: block; }
+.game-over-title {
+  font-size: 1.5rem;
+  color: #f0c040;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.final-score {
+  font-size: 3.2rem;
+  color: #fff;
+  font-weight: bold;
+  line-height: 1;
+  margin: 10px 0 6px;
+  text-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+.score-rating {
+  font-size: 0.9rem;
+  color: #8fb89a;
+  margin-bottom: 18px;
+  font-style: italic;
+}
+
+/* ── Rules modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-panel {
+  background: #0f2a1a;
+  border: 2px solid #f0c040;
+  border-radius: 16px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 82vh;
+  overflow-y: auto;
+  padding: 32px 28px;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.7);
+}
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: 1px solid #2d6e40;
+  color: #8fb89a;
+  font-size: 1rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.1s, color 0.1s;
+}
+.modal-close:hover { background: #1a4a2a; color: #e8d5a3; }
+.modal-title {
+  font-size: 1.4rem;
+  color: #f0c040;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 22px;
+}
+.modal-section { margin-bottom: 18px; }
+.modal-section h3 {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6ab87a;
+  margin-bottom: 7px;
+  border-bottom: 1px solid #1a4a2a;
+  padding-bottom: 4px;
+}
+.modal-section p, .modal-section li {
+  font-size: 0.84rem;
+  color: #c8c0a8;
+  line-height: 1.65;
+  margin-bottom: 3px;
+}
+.modal-section ul { list-style: none; padding: 0; }
+.modal-section li::before { content: '▸ '; color: #f0c040; }
+.score-tag { color: #f0c040; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="header-wrapper">
+  <h1>Yahtzee</h1>
+  <p class="subtitle">Casino Night Edition</p>
+  <div class="high-score-badge" id="highScoreBadge">
+    <span class="hs-label">Best</span>
+    <span class="hs-value" id="highScoreVal">—</span>
+  </div>
+</div>
+
+<div class="game-container">
+
+  <div class="scorecard" id="scorecard"></div>
+
+  <div class="bottom-panel">
+    <div class="dice-area">
+      <div class="dice-row" id="diceRow"></div>
+    </div>
+
+    <div class="controls">
+      <div class="roll-status" id="rollStatus">Roll 1 of 3</div>
+      <button class="btn btn-roll"  id="rollBtn">Roll Dice</button>
+      <button class="btn btn-new"   id="newGameBtn">New Game</button>
+      <button class="btn btn-rules" id="rulesBtn">? How to Play</button>
+    </div>
+
+    <div class="game-over-panel" id="gameOverPanel">
+      <div class="game-over-title">Game Over!</div>
+      <div class="final-score"   id="finalScore">0</div>
+      <div class="score-rating"  id="scoreRating"></div>
+      <button class="btn btn-new" id="playAgainBtn" style="width:180px;margin:0 auto;">Play Again</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Rules modal -->
+<div class="modal-overlay" id="rulesModal">
+  <div class="modal-panel">
+    <button class="modal-close" id="closeRulesBtn">✕</button>
+    <h2 class="modal-title">How to Play</h2>
+
+    <div class="modal-section">
+      <h3>Objective</h3>
+      <p>Score as many points as possible across 13 turns by filling in every category on the scorecard. Highest grand total wins.</p>
+    </div>
+
+    <div class="modal-section">
+      <h3>Taking a Turn</h3>
+      <ul>
+        <li>Click <strong>Roll Dice</strong> to roll all 5 dice. You get up to 3 rolls per turn.</li>
+        <li>After each roll, click any die to <strong>hold</strong> it (gold border = held). Held dice are kept on your next roll.</li>
+        <li>After 1–3 rolls, click a category on the scorecard to record your score and end the turn.</li>
+        <li>If no category fits, <strong>scratch</strong> any open category to score 0 and move on.</li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <h3>Upper Section</h3>
+      <ul>
+        <li><span class="score-tag">Ones – Sixes:</span> Sum of all dice showing that face value.</li>
+        <li><span class="score-tag">Bonus +35:</span> Earned if your upper section total reaches 63 or more (average of 3 per face).</li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <h3>Lower Section</h3>
+      <ul>
+        <li><span class="score-tag">Three of a Kind:</span> At least 3 matching dice — score = sum of all 5 dice.</li>
+        <li><span class="score-tag">Four of a Kind:</span> At least 4 matching dice — score = sum of all 5 dice.</li>
+        <li><span class="score-tag">Full House:</span> 3 of one value + 2 of another — <strong>25 pts</strong>.</li>
+        <li><span class="score-tag">Small Straight:</span> 4 sequential dice (e.g. 2-3-4-5) — <strong>30 pts</strong>.</li>
+        <li><span class="score-tag">Large Straight:</span> 5 sequential dice (1-2-3-4-5 or 2-3-4-5-6) — <strong>40 pts</strong>.</li>
+        <li><span class="score-tag">Yahtzee:</span> All 5 dice the same — <strong>50 pts</strong>.</li>
+        <li><span class="score-tag">Chance:</span> Any roll — score = sum of all 5 dice. Use as a fallback.</li>
+      </ul>
+    </div>
+
+    <div class="modal-section">
+      <h3>Yahtzee Bonus</h3>
+      <p>Roll a second (or third…) Yahtzee after already scoring 50 in the Yahtzee box? Each extra Yahtzee earns <span class="score-tag">+100 bonus points</span> and acts as a joker — it counts as a valid Full House, Small Straight, or Large Straight too.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AUDIO
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let _audioCtx = null;
+function ctx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+function tone(freq, type, t0, dur, vol) {
+  const ac = ctx(), osc = ac.createOscillator(), gain = ac.createGain();
+  osc.connect(gain); gain.connect(ac.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(vol, t0);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.start(t0); osc.stop(t0 + dur + 0.02);
+}
+function noise(t0, dur, vol, centerFreq) {
+  const ac = ctx(), rate = ac.sampleRate;
+  const buf = ac.createBuffer(1, Math.ceil(rate * dur), rate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const src = ac.createBufferSource(), filter = ac.createBiquadFilter(), gain = ac.createGain();
+  src.buffer = buf;
+  filter.type = 'bandpass'; filter.frequency.value = centerFreq || 700; filter.Q.value = 0.6;
+  gain.gain.setValueAtTime(vol, t0);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(filter); filter.connect(gain); gain.connect(ac.destination);
+  src.start(t0); src.stop(t0 + dur);
+}
+const sfx = {
+  roll() {
+    const t = ctx().currentTime;
+    for (let i = 0; i < 6; i++) {
+      noise(t + i * 0.065, 0.09, 0.35, 500 + Math.random() * 600);
+      tone(70 + Math.random() * 50, 'square', t + i * 0.065, 0.05, 0.12);
+    }
+  },
+  lock()   { const t = ctx().currentTime; tone(130,'sine',t,0.07,0.45); tone(95,'sine',t+0.05,0.10,0.30); },
+  unlock() { const t = ctx().currentTime; tone(95,'sine',t,0.05,0.30); tone(150,'sine',t+0.04,0.07,0.20); },
+  score()  { const t = ctx().currentTime; tone(528,'sine',t,0.25,0.30); tone(660,'sine',t+0.12,0.18,0.20); },
+  yahtzee() {
+    const t = ctx().currentTime;
+    [392,494,587,698,784,880].forEach((f,i) => tone(f,'triangle',t+i*0.09,0.22,0.35));
+    [523,659,784].forEach((f,i) => tone(f,'sine',t+0.55+i*0.06,0.40,0.20));
+  },
+  bonusYahtzee() {
+    const t = ctx().currentTime;
+    [523,659,784,1047,1319].forEach((f,i) => {
+      tone(f,'triangle',t+i*0.08,0.24,0.38);
+      tone(f*1.5,'sine',t+i*0.08+0.04,0.18,0.18);
+    });
+    [784,988,1175,1568].forEach((f,i) => tone(f,'sine',t+0.5+i*0.10,0.50,0.22));
+  },
+  gameOver() { const t = ctx().currentTime; [523,494,440,392,330].forEach((f,i) => tone(f,'sine',t+i*0.28,0.32,0.28)); },
+  newGame()  { const t = ctx().currentTime; [330,440,554].forEach((f,i) => tone(f,'triangle',t+i*0.11,0.16,0.28)); },
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CATEGORIES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const UPPER = [
+  {id:'ones',label:'Ones'},{id:'twos',label:'Twos'},{id:'threes',label:'Threes'},
+  {id:'fours',label:'Fours'},{id:'fives',label:'Fives'},{id:'sixes',label:'Sixes'},
+];
+const LOWER = [
+  {id:'threeOfAKind',label:'Three of a Kind'},{id:'fourOfAKind',label:'Four of a Kind'},
+  {id:'fullHouse',label:'Full House'},{id:'smallStraight',label:'Sm. Straight'},
+  {id:'largeStraight',label:'Lg. Straight'},{id:'yahtzee',label:'Yahtzee'},
+  {id:'chance',label:'Chance'},
+];
+const ALL_CATS = [...UPPER, ...LOWER];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let state = {};
+let sessionHighScore = 0;
+let hasCompletedGame = false;
+
+function initState() {
+  state = {
+    dice: [1,2,3,4,5], locked: [false,false,false,false,false],
+    rollsLeft: 3, hasRolled: false, turn: 0,
+    scores: {}, yahtzeeBonus: 0, gameOver: false,
+  };
+  ALL_CATS.forEach(c => { state.scores[c.id] = null; });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SCORING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function sum(dice)   { return dice.reduce((a,b) => a+b, 0); }
+function tally(dice) { const c={}; dice.forEach(d => { c[d]=(c[d]||0)+1; }); return c; }
+
+function calcScore(id, dice) {
+  const c = tally(dice), vs = Object.values(c), s = sum(dice);
+  const isY = vs.some(v => v === 5);
+  const joker = isY && state.scores['yahtzee'] === 50;
+  switch (id) {
+    case 'ones':          return dice.filter(d=>d===1).length;
+    case 'twos':          return dice.filter(d=>d===2).length * 2;
+    case 'threes':        return dice.filter(d=>d===3).length * 3;
+    case 'fours':         return dice.filter(d=>d===4).length * 4;
+    case 'fives':         return dice.filter(d=>d===5).length * 5;
+    case 'sixes':         return dice.filter(d=>d===6).length * 6;
+    case 'threeOfAKind':  return vs.some(v=>v>=3) ? s : 0;
+    case 'fourOfAKind':   return vs.some(v=>v>=4) ? s : 0;
+    case 'fullHouse':
+      if (joker) return 25;
+      return (vs.includes(3) && vs.includes(2)) ? 25 : 0;
+    case 'smallStraight': {
+      if (joker) return 30;
+      const u = [...new Set(dice)].sort((a,b)=>a-b).join('');
+      return ['1234','2345','3456'].some(p=>u.includes(p)) ? 30 : 0;
+    }
+    case 'largeStraight': {
+      if (joker) return 40;
+      const u = [...new Set(dice)].sort((a,b)=>a-b).join('');
+      return (u==='12345'||u==='23456') ? 40 : 0;
+    }
+    case 'yahtzee': return isY ? 50 : 0;
+    case 'chance':  return s;
+    default:        return 0;
+  }
+}
+
+function upperRaw()  { return UPPER.reduce((t,c) => t+(state.scores[c.id]||0), 0); }
+function upperBonus(){ return upperRaw()>=63 ? 35 : 0; }
+function upperTotal(){ return upperRaw()+upperBonus(); }
+function lowerTotal(){ return LOWER.reduce((t,c)=>t+(state.scores[c.id]||0),0)+state.yahtzeeBonus*100; }
+function grandTotal(){ return upperTotal()+lowerTotal(); }
+function isYahtzeeRoll(dice){ return Object.values(tally(dice)).some(v=>v===5); }
+
+function rating(score) {
+  if (score>=400) return 'Legendary — incredible play!';
+  if (score>=350) return 'Outstanding performance!';
+  if (score>=300) return 'Excellent score!';
+  if (score>=250) return 'Great game!';
+  if (score>=200) return 'Solid effort!';
+  if (score>=150) return 'Not bad — keep practicing.';
+  return 'Better luck next time!';
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SVG DICE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const PIPS = {
+  1:[[35,35]],
+  2:[[22,22],[48,48]],
+  3:[[22,22],[35,35],[48,48]],
+  4:[[22,22],[48,22],[22,48],[48,48]],
+  5:[[22,22],[48,22],[35,35],[22,48],[48,48]],
+  6:[[22,19],[48,19],[22,35],[48,35],[22,51],[48,51]],
+};
+function dieSVG(v) {
+  const circles = (PIPS[v]||[]).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5.5" fill="#1a2a1a"/>`).join('');
+  return `<svg viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">${circles}</svg>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// RENDER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderDice() {
+  const row = document.getElementById('diceRow');
+  row.innerHTML = '';
+  const canLock = state.hasRolled && state.rollsLeft > 0 && !state.gameOver;
+  state.dice.forEach((val, i) => {
+    const div = document.createElement('div');
+    div.className = 'die' + (state.locked[i]?' locked':'') + (!canLock?' unclickable':'');
+    div.innerHTML = dieSVG(val) + '<span class="lock-badge">HELD</span>';
+    if (canLock) div.addEventListener('click', () => toggleLock(i));
+    row.appendChild(div);
+  });
+}
+
+function renderScorecard() {
+  const card = document.getElementById('scorecard');
+  const showPreview = state.hasRolled && !state.gameOver;
+  const uRaw = upperRaw(), uBns = upperBonus();
+
+  function rowHTML(cat) {
+    const scored    = state.scores[cat.id] !== null;
+    const preview   = (!scored && showPreview) ? calcScore(cat.id, state.dice) : null;
+    const clickable = !scored && !state.gameOver && state.hasRolled;
+    let valEl;
+    if (scored) {
+      valEl = `<span class="score-value locked-val">${state.scores[cat.id]}</span>`;
+    } else if (preview !== null) {
+      valEl = `<span class="score-value ${preview>0?'preview':'zero-preview'}">${preview}</span>`;
+    } else {
+      valEl = `<span class="score-value dash">—</span>`;
+    }
+    const cls = ['score-row', scored?'scored no-hover':'', !clickable?'no-hover':''].filter(Boolean).join(' ');
+    return `<div class="${cls}" data-cat="${clickable?cat.id:''}"><span class="score-label">${cat.label}</span>${valEl}</div>`;
+  }
+
+  card.innerHTML = `
+    <div class="scorecard-header">
+      <span>Scorecard</span>
+      <span>Turn ${Math.min(state.turn+1,13)} / 13</span>
+    </div>
+    <div class="scorecard-cols">
+      <div class="scorecard-col">
+        <div class="section-header">Upper Section</div>
+        ${UPPER.map(rowHTML).join('')}
+        <div class="score-row meta">
+          <span class="score-label">Bonus (≥63 → +35) <span class="bonus-progress">${Math.min(uRaw,63)}/63</span></span>
+          <span class="score-value ${uBns?'bonus-val':'dash'}">${uBns||'—'}</span>
+        </div>
+        <div class="score-row total-row">
+          <span class="score-label">Upper Total</span>
+          <span class="score-value total-val">${upperTotal()}</span>
+        </div>
+      </div>
+      <div class="scorecard-col">
+        <div class="section-header">Lower Section</div>
+        ${LOWER.map(rowHTML).join('')}
+        <div class="yahtzee-bonus-row">
+          <span class="score-label" style="font-size:0.76rem">Yahtzee Bonuses (+100 each)</span>
+          <div class="bonus-dots">
+            ${[0,1,2].map(i=>`<div class="bonus-dot${state.yahtzeeBonus>i?' earned':''}"></div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grand-total-row">
+      <span class="score-label" style="font-size:0.9rem;color:#e8d5a3;font-weight:bold">Grand Total</span>
+      <span class="score-value total-val" style="font-size:1.1rem">${grandTotal()}</span>
+    </div>
+  `;
+
+  card.querySelectorAll('[data-cat]').forEach(el => {
+    const id = el.getAttribute('data-cat');
+    if (id) el.addEventListener('click', () => scoreCategory(id));
+  });
+}
+
+function renderControls() {
+  const statusEl = document.getElementById('rollStatus');
+  const rollBtn  = document.getElementById('rollBtn');
+  if (state.gameOver) {
+    statusEl.textContent = 'Game complete!';
+    rollBtn.disabled = true;
+    return;
+  }
+  if (state.rollsLeft === 0) {
+    statusEl.textContent = 'Select a scoring category';
+    rollBtn.disabled = true;
+  } else if (!state.hasRolled) {
+    statusEl.textContent = 'Roll 1 of 3';
+    rollBtn.disabled = false;
+  } else {
+    const held = state.locked.filter(Boolean).length;
+    statusEl.textContent = `Roll ${4 - state.rollsLeft} of 3  •  ${held} held`;
+    rollBtn.disabled = false;
+  }
+}
+
+function renderHighScore() {
+  document.getElementById('highScoreVal').textContent = hasCompletedGame ? sessionHighScore : '—';
+}
+
+function render() { renderDice(); renderScorecard(); renderControls(); }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ACTIONS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function rollDice() {
+  if (state.rollsLeft <= 0 || state.gameOver) return;
+  sfx.roll();
+
+  const diceEls = Array.from(document.querySelectorAll('.die'));
+  diceEls.forEach((el, i) => { if (!state.locked[i]) el.classList.add('rolling'); });
+
+  // At 60% of animation: compute new values and update SVG so dice land on correct face
+  setTimeout(() => {
+    state.dice = state.dice.map((v,i) => state.locked[i] ? v : Math.floor(Math.random()*6)+1);
+    diceEls.forEach((el, i) => {
+      if (!state.locked[i]) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = dieSVG(state.dice[i]);
+        const oldSvg = el.querySelector('svg');
+        if (oldSvg) oldSvg.replaceWith(tmp.firstChild);
+      }
+    });
+  }, 390);
+
+  // After animation: finalize state
+  setTimeout(() => {
+    state.rollsLeft--;
+    state.hasRolled = true;
+    render();
+    if (isYahtzeeRoll(state.dice)) {
+      if (state.scores['yahtzee'] === 50) setTimeout(() => sfx.bonusYahtzee(), 80);
+      else if (state.scores['yahtzee'] === null) setTimeout(() => sfx.yahtzee(), 80);
+    }
+  }, 650);
+}
+
+function toggleLock(index) {
+  if (!state.hasRolled || state.rollsLeft <= 0 || state.gameOver) return;
+  state.locked[index] = !state.locked[index];
+  state.locked[index] ? sfx.lock() : sfx.unlock();
+  render();
+}
+
+function scoreCategory(id) {
+  if (!state.hasRolled || state.scores[id] !== null || state.gameOver) return;
+  state.scores[id] = calcScore(id, state.dice);
+  if (isYahtzeeRoll(state.dice) && state.scores['yahtzee'] === 50 && id !== 'yahtzee') {
+    state.yahtzeeBonus++;
+    setTimeout(() => sfx.bonusYahtzee(), 60);
+  } else {
+    sfx.score();
+  }
+  state.turn++;
+  if (state.turn >= 13) {
+    state.gameOver = true;
+    render();
+    showGameOver();
+    return;
+  }
+  state.dice = [1,2,3,4,5];
+  state.locked = [false,false,false,false,false];
+  state.rollsLeft = 3;
+  state.hasRolled = false;
+  render();
+}
+
+function showGameOver() {
+  const total = grandTotal();
+  document.getElementById('finalScore').textContent = total;
+  document.getElementById('scoreRating').textContent = rating(total);
+  document.getElementById('gameOverPanel').classList.add('visible');
+  setTimeout(() => sfx.gameOver(), 400);
+
+  hasCompletedGame = true;
+  if (total > sessionHighScore) {
+    sessionHighScore = total;
+    renderHighScore();
+    const badge = document.getElementById('highScoreBadge');
+    badge.classList.remove('new-record');
+    void badge.offsetWidth; // restart animation
+    badge.classList.add('new-record');
+  } else {
+    renderHighScore();
+  }
+}
+
+function newGame() {
+  sfx.newGame();
+  document.getElementById('gameOverPanel').classList.remove('visible');
+  initState();
+  render();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MODAL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openRules()  { document.getElementById('rulesModal').classList.add('open'); }
+function closeRules() { document.getElementById('rulesModal').classList.remove('open'); }
+document.getElementById('rulesBtn').addEventListener('click', openRules);
+document.getElementById('closeRulesBtn').addEventListener('click', closeRules);
+document.getElementById('rulesModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('rulesModal')) closeRules();
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// EVENTS & INIT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+document.getElementById('rollBtn').addEventListener('click', rollDice);
+document.getElementById('newGameBtn').addEventListener('click', newGame);
+document.getElementById('playAgainBtn').addEventListener('click', newGame);
+
+initState();
+render();
+renderHighScore();
+</script>
+</body>
+</html>
