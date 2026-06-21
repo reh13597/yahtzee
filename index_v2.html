@@ -168,37 +168,35 @@ h1 {
 }
 
 .roll-btn {
-  background: linear-gradient(180deg, #2a7a42 0%, #1e5a32 40%, #164a28 100%);
+  background: linear-gradient(180deg, #2d6e40 0%, #1e5a32 50%, #184a28 100%);
   border: 2px solid #4ecb71;
-  border-radius: 14px;
+  border-radius: 12px;
   width: auto;
-  min-width: 160px;
   height: auto;
-  padding: 14px 32px;
-  color: #f0c040;
+  padding: 14px 40px;
+  color: #fff;
   font-family: inherit;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: bold;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.08em;
   cursor: pointer;
   text-transform: uppercase;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1);
-  transition: transform 0.1s, box-shadow 0.1s, border-color 0.2s;
-  line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1);
+  transition: transform 0.1s, box-shadow 0.1s;
+  line-height: 1.3;
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 .roll-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1), 0 0 12px rgba(78,203,113,0.2);
-  border-color: #6edb91;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(78,203,113,0.3), inset 0 1px 2px rgba(255,255,255,0.1);
+  border-color: #6ddb8a;
 }
-.roll-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.roll-btn:active:not(:disabled) { transform: scale(0.97); }
 .roll-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: default;
-  border-color: #3a5a42;
-  color: #6a8a72;
-  background: linear-gradient(180deg, #1a3a24 0%, #122a1a 100%);
+  border-color: #555;
+  background: linear-gradient(180deg, #555 0%, #333 100%);
 }
 
 .roll-status {
@@ -415,7 +413,7 @@ h1 {
   border: 2px solid #2d6e40;
   border-radius: 16px;
   padding: 28px 32px;
-  max-width: 520px;
+  max-width: 580px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
@@ -437,26 +435,16 @@ h1 {
   text-transform: uppercase;
 }
 .rules-content p, .rules-content li {
-  font-size: 0.8rem;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  line-height: 1.7;
   margin-bottom: 4px;
 }
-.rules-content ul {
-  list-style: none;
-  padding-left: 0;
-}
 .rules-content li {
-  padding: 4px 0 4px 12px;
+  margin-bottom: 8px;
   border-left: 2px solid #2d6e40;
-  margin-bottom: 6px;
+  padding-left: 8px;
 }
-.rules-content li strong {
-  color: #f0c040;
-}
-.rules-content em {
-  color: #4ecb71;
-  font-style: normal;
-}
+.rules-content ul { padding-left: 18px; }
 .close-rules {
   display: block;
   margin: 18px auto 0;
@@ -496,7 +484,7 @@ h1 {
   .die { width: 56px; height: 56px; }
   .scorecard-cols { grid-template-columns: 1fr; }
   .scorecard-col:first-child { border-right: none; border-bottom: 1px solid #1e3a26; }
-  .roll-btn { min-width: 120px; font-size: 0.9rem; padding: 10px 20px; }
+  .roll-btn { width: 90px; height: 90px; font-size: 0.82rem; }
   .header-btns { position: static; justify-content: center; margin-bottom: 8px; }
   .high-score-badge { position: static; margin: 8px auto 0; }
   .game-over-panel { padding: 28px 24px; }
@@ -554,39 +542,27 @@ h1 {
 <div class="rules-modal" id="rulesModal">
   <div class="rules-content">
     <h2>How to Play Yahtzee</h2>
-    <p>Each game consists of <strong>13 turns</strong>. On each turn, you roll 5 dice up to 3 times. After your first roll, you may <strong>click any dice to hold them</strong> — held dice won't be re-rolled. After rolling at least once, you must choose one unused scoring category to record your score.</p>
+    <p>Each game consists of <strong>13 rounds</strong>. Every round, you roll 5 dice up to <strong>3 times</strong>. After any roll, you may <strong>hold</strong> dice you want to keep by clicking them, then roll again. After at least one roll, choose a scoring category on the scorecard to lock in your points for that round.</p>
 
     <h3>Upper Section</h3>
     <ul>
-      <li><strong>Ones:</strong> Add up all dice showing 1. (e.g., 1-1-3-4-6 = 2 pts)</li>
-      <li><strong>Twos:</strong> Add up all dice showing 2. (e.g., 2-2-2-5-6 = 6 pts)</li>
-      <li><strong>Threes:</strong> Add up all dice showing 3.</li>
-      <li><strong>Fours:</strong> Add up all dice showing 4.</li>
-      <li><strong>Fives:</strong> Add up all dice showing 5.</li>
-      <li><strong>Sixes:</strong> Add up all dice showing 6.</li>
-      <li><strong>Upper Bonus:</strong> If your upper section total is 63 or more, you earn a <strong>+35 point bonus</strong>. Tip: aim for 3 of each number to hit 63.</li>
+      <li><strong>Ones through Sixes:</strong> Add up only the dice showing that number. For example, if you have three 4s, your "Fours" score would be 12 (3 × 4). Tip: aim for at least three of each number to reach the bonus threshold.</li>
+      <li><strong>Upper Bonus (+35):</strong> If your upper section total is 63 or more, you earn a 35-point bonus. Scoring three of each number (1+1+1 + 2+2+2 + ... + 6+6+6) gives exactly 63.</li>
     </ul>
 
     <h3>Lower Section</h3>
     <ul>
-      <li><strong>Three of a Kind:</strong> At least 3 dice showing the same number. Score = sum of <em>all 5</em> dice. (e.g., 4-4-4-2-6 = 20 pts)</li>
-      <li><strong>Four of a Kind:</strong> At least 4 dice showing the same number. Score = sum of <em>all 5</em> dice.</li>
-      <li><strong>Full House:</strong> Three of one number and two of another (e.g., 3-3-3-5-5). Scores a flat <strong>25 points</strong>.</li>
-      <li><strong>Small Straight:</strong> Four dice in a row (e.g., 1-2-3-4, 2-3-4-5, or 3-4-5-6). Scores a flat <strong>30 points</strong>.</li>
-      <li><strong>Large Straight:</strong> All five dice in a row (1-2-3-4-5 or 2-3-4-5-6). Scores a flat <strong>40 points</strong>.</li>
-      <li><strong>Yahtzee:</strong> All 5 dice showing the same number. Scores <strong>50 points</strong>!</li>
-      <li><strong>Chance:</strong> No requirements — just add up all 5 dice. Useful as a fallback when nothing else fits.</li>
+      <li><strong>Three of a Kind:</strong> At least 3 dice showing the same value. Score = sum of <em>all five</em> dice. Try to get three of a high number for maximum points.</li>
+      <li><strong>Four of a Kind:</strong> At least 4 dice showing the same value. Score = sum of <em>all five</em> dice.</li>
+      <li><strong>Full House:</strong> Three of one number and two of another (e.g., 3-3-3-5-5). Always scores <strong>25 points</strong>.</li>
+      <li><strong>Small Straight:</strong> Four dice in a row (e.g., 1-2-3-4, 2-3-4-5, or 3-4-5-6). Always scores <strong>30 points</strong>.</li>
+      <li><strong>Large Straight:</strong> All five dice in a row (1-2-3-4-5 or 2-3-4-5-6). Always scores <strong>40 points</strong>.</li>
+      <li><strong>Yahtzee:</strong> All five dice showing the same value. Scores <strong>50 points</strong> — the highest single category!</li>
+      <li><strong>Chance:</strong> No requirements — simply add up all five dice. Use this as a fallback when nothing else fits well.</li>
     </ul>
 
-    <h3>Yahtzee Bonus &amp; Joker Rule</h3>
-    <p>If you've already scored 50 in the Yahtzee category and roll another Yahtzee, you earn a <strong>+100 point bonus</strong> (up to 3 times). You must still choose a category for the turn — if the matching upper category is open, you must use it. Otherwise, you may use any open lower section category at its full point value (this is the "Joker Rule").</p>
-
-    <h3>Keyboard Shortcuts</h3>
-    <ul>
-      <li><strong>Space / Enter:</strong> Roll the dice</li>
-      <li><strong>1–5:</strong> Toggle hold on each die</li>
-      <li><strong>Esc:</strong> Close this window</li>
-    </ul>
+    <h3>Yahtzee Bonus</h3>
+    <p>Already scored 50 in Yahtzee and rolled another one? You earn a <strong>+100 bonus</strong> each additional Yahtzee (up to 3 times). Plus, the <strong>Joker Rule</strong> lets you place it in any open lower section category at full value, as long as the matching upper section number is already filled.</p>
     <button class="close-rules" id="closeRulesBtn">Got It</button>
   </div>
 </div>
@@ -751,105 +727,98 @@ function ensureAudio() {
 const sfx = {
   roll() {
     const ctx = ensureAudio();
-    const t = ctx.currentTime;
-    // Simulate 5 dice bouncing on felt with staggered noise bursts
-    const bounces = [
-      { time: 0.00, dur: 0.045, vol: 0.18 },
-      { time: 0.07, dur: 0.040, vol: 0.15 },
-      { time: 0.15, dur: 0.035, vol: 0.11 },
-      { time: 0.24, dur: 0.030, vol: 0.07 },
-      { time: 0.32, dur: 0.025, vol: 0.04 },
-      { time: 0.37, dur: 0.020, vol: 0.02 },
-    ];
-    bounces.forEach(b => {
-      const samples = Math.ceil(ctx.sampleRate * b.dur);
-      const buf = ctx.createBuffer(1, samples, ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < samples; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.012));
-      }
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
-      const bandpass = ctx.createBiquadFilter();
-      bandpass.type = 'bandpass';
-      bandpass.frequency.value = 2500 + Math.random() * 1000;
-      bandpass.Q.value = 1.2;
-      const gain = ctx.createGain();
-      gain.gain.value = b.vol;
-      src.connect(bandpass).connect(gain).connect(ctx.destination);
-      src.start(t + b.time);
-    });
-    // Subtle low rumble underneath
-    const rumbleSamples = Math.ceil(ctx.sampleRate * 0.4);
-    const rumbleBuf = ctx.createBuffer(1, rumbleSamples, ctx.sampleRate);
-    const rumbleData = rumbleBuf.getChannelData(0);
-    for (let i = 0; i < rumbleSamples; i++) {
-      rumbleData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.1));
+    const duration = 0.5;
+    const sampleCount = ctx.sampleRate * duration;
+
+    // Layer 1: mid-frequency rattle (bandpass ~1100Hz) — dice body tumble
+    const buf1 = ctx.createBuffer(1, sampleCount, ctx.sampleRate);
+    const data1 = buf1.getChannelData(0);
+    for (let i = 0; i < data1.length; i++) {
+      const t = i / ctx.sampleRate;
+      const rattle = 1 + 0.6 * Math.sin(t * 95) * Math.sin(t * 37);
+      data1[i] = (Math.random() * 2 - 1) * rattle * Math.exp(-t / 0.22);
     }
-    const rumbleSrc = ctx.createBufferSource();
-    rumbleSrc.buffer = rumbleBuf;
-    const rumbleBP = ctx.createBiquadFilter();
-    rumbleBP.type = 'bandpass';
-    rumbleBP.frequency.value = 300;
-    rumbleBP.Q.value = 0.8;
-    const rumbleGain = ctx.createGain();
-    rumbleGain.gain.value = 0.06;
-    rumbleSrc.connect(rumbleBP).connect(rumbleGain).connect(ctx.destination);
-    rumbleSrc.start(t);
+    const src1 = ctx.createBufferSource();
+    src1.buffer = buf1;
+    const bp1 = ctx.createBiquadFilter();
+    bp1.type = 'bandpass';
+    bp1.frequency.value = 1100;
+    bp1.Q.value = 0.8;
+    const lp1 = ctx.createBiquadFilter();
+    lp1.type = 'lowpass';
+    lp1.frequency.value = 3500;
+    const gain1 = ctx.createGain();
+    gain1.gain.value = 0.18;
+    src1.connect(bp1).connect(lp1).connect(gain1).connect(ctx.destination);
+    src1.start();
+
+    // Layer 2: higher frequency texture (bandpass ~2800Hz) — felt/surface detail
+    const buf2 = ctx.createBuffer(1, sampleCount, ctx.sampleRate);
+    const data2 = buf2.getChannelData(0);
+    for (let i = 0; i < data2.length; i++) {
+      const t = i / ctx.sampleRate;
+      const rattle = 1 + 0.5 * Math.sin(t * 120) * Math.sin(t * 53);
+      data2[i] = (Math.random() * 2 - 1) * rattle * Math.exp(-t / 0.16);
+    }
+    const src2 = ctx.createBufferSource();
+    src2.buffer = buf2;
+    const bp2 = ctx.createBiquadFilter();
+    bp2.type = 'bandpass';
+    bp2.frequency.value = 2800;
+    bp2.Q.value = 0.6;
+    const lp2 = ctx.createBiquadFilter();
+    lp2.type = 'lowpass';
+    lp2.frequency.value = 5000;
+    const gain2 = ctx.createGain();
+    gain2.gain.value = 0.08;
+    src2.connect(bp2).connect(lp2).connect(gain2).connect(ctx.destination);
+    src2.start();
   },
 
   lock() {
+    // Poker chip "click" — short burst of bandpass-filtered noise
     const ctx = ensureAudio();
     const t = ctx.currentTime;
-    // Poker chip click — short filtered noise burst
-    const clickSamples = Math.ceil(ctx.sampleRate * 0.015);
-    const clickBuf = ctx.createBuffer(1, clickSamples, ctx.sampleRate);
-    const clickData = clickBuf.getChannelData(0);
-    for (let i = 0; i < clickSamples; i++) {
-      clickData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.004));
+    const dur = 0.04;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1);
     }
-    const clickSrc = ctx.createBufferSource();
-    clickSrc.buffer = clickBuf;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
     const bp = ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.frequency.value = 3500;
-    bp.Q.value = 2.0;
-    const clickGain = ctx.createGain();
-    clickGain.gain.value = 0.25;
-    clickSrc.connect(bp).connect(clickGain).connect(ctx.destination);
-    clickSrc.start(t);
-    // Low thud underneath for weight
-    const thud = ctx.createOscillator();
-    const thudGain = ctx.createGain();
-    thud.frequency.value = 150;
-    thud.type = 'sine';
-    thudGain.gain.setValueAtTime(0.06, t);
-    thudGain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
-    thud.connect(thudGain).connect(ctx.destination);
-    thud.start(t);
-    thud.stop(t + 0.03);
+    bp.frequency.value = 3000;
+    bp.Q.value = 1.2;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.18, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    src.connect(bp).connect(gain).connect(ctx.destination);
+    src.start(t);
   },
 
   unlock() {
+    // Softer, lower chip click for unlock
     const ctx = ensureAudio();
     const t = ctx.currentTime;
-    // Softer, lighter click — no low thud
-    const clickSamples = Math.ceil(ctx.sampleRate * 0.010);
-    const clickBuf = ctx.createBuffer(1, clickSamples, ctx.sampleRate);
-    const clickData = clickBuf.getChannelData(0);
-    for (let i = 0; i < clickSamples; i++) {
-      clickData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.003));
+    const dur = 0.04;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1);
     }
-    const clickSrc = ctx.createBufferSource();
-    clickSrc.buffer = clickBuf;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
     const bp = ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.frequency.value = 2500;
-    bp.Q.value = 1.8;
-    const clickGain = ctx.createGain();
-    clickGain.gain.value = 0.18;
-    clickSrc.connect(bp).connect(clickGain).connect(ctx.destination);
-    clickSrc.start(t);
+    bp.frequency.value = 2200;
+    bp.Q.value = 1.0;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.12, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    src.connect(bp).connect(gain).connect(ctx.destination);
+    src.start(t);
   },
 
   score() {
@@ -917,40 +886,43 @@ const sfx = {
   },
 
   gameOver() {
+    // Grand major chord resolution with low rumble
     const ctx = ensureAudio();
     const t = ctx.currentTime;
-    // Jazzy descending chord progression with warmth
-    const chords = [
-      { freqs: [523, 659, 784, 988], start: 0, dur: 0.7 },       // C maj7
-      { freqs: [440, 554, 659, 880], start: 0.65, dur: 0.9 },    // A maj (resolving down)
-    ];
-    chords.forEach(chord => {
-      const chordGain = ctx.createGain();
-      const s = t + chord.start;
-      chordGain.gain.setValueAtTime(0.001, s);
-      chordGain.gain.exponentialRampToValueAtTime(0.08, s + 0.05);
-      chordGain.gain.setValueAtTime(0.08, s + chord.dur * 0.5);
-      chordGain.gain.exponentialRampToValueAtTime(0.001, s + chord.dur);
-      chordGain.connect(ctx.destination);
-      chord.freqs.forEach(freq => {
-        // Two slightly detuned oscillators per note for warmth
-        const osc1 = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        osc1.frequency.value = freq;
-        osc2.frequency.value = freq * 1.003;
-        osc1.type = 'sine';
-        osc2.type = 'sine';
-        const noteGain = ctx.createGain();
-        noteGain.gain.value = 0.5;
-        osc1.connect(noteGain);
-        osc2.connect(noteGain);
-        noteGain.connect(chordGain);
-        osc1.start(s);
-        osc2.start(s);
-        osc1.stop(s + chord.dur);
-        osc2.stop(s + chord.dur);
-      });
+    const dur = 1.5;
+
+    // C major chord: C4, E4, G4, C5 — triangle waves with slight detuning
+    [261.63, 329.63, 392.00, 523.25].forEach((freq) => {
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      osc1.type = 'triangle';
+      osc2.type = 'triangle';
+      osc1.frequency.value = freq;
+      osc2.frequency.value = freq * 1.004; // slight detune for warmth
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.07, t);
+      gain.gain.setValueAtTime(0.07, t + dur * 0.6);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+      osc1.start(t);
+      osc2.start(t);
+      osc1.stop(t + dur);
+      osc2.stop(t + dur);
     });
+
+    // Subtle low rumble for gravitas
+    const rumble = ctx.createOscillator();
+    rumble.type = 'sine';
+    rumble.frequency.value = 80;
+    const rumbleGain = ctx.createGain();
+    rumbleGain.gain.setValueAtTime(0.09, t);
+    rumbleGain.gain.setValueAtTime(0.09, t + dur * 0.5);
+    rumbleGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    rumble.connect(rumbleGain).connect(ctx.destination);
+    rumble.start(t);
+    rumble.stop(t + dur);
   },
 
   newGame() {
